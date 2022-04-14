@@ -34,7 +34,7 @@ class TestCredentials(object):
 
     @classmethod
     def make_credentials(cls):
-        return gdch_credentials.Credentials(
+        return gdch_credentials.ServiceAccountCredentials(
             cls.K8S_CA_CERT_PATH,
             cls.K8S_CERT_PATH,
             cls.K8S_KEY_PATH,
@@ -130,11 +130,11 @@ class TestCredentials(object):
         )
 
     @mock.patch(
-        "google.oauth2.gdch_credentials.Credentials._make_k8s_token_request",
+        "google.oauth2.gdch_credentials.ServiceAccountCredentials._make_k8s_token_request",
         autospec=True,
     )
     @mock.patch(
-        "google.oauth2.gdch_credentials.Credentials._make_ais_token_request",
+        "google.oauth2.gdch_credentials.ServiceAccountCredentials._make_ais_token_request",
         autospec=True,
     )
     def test_refresh(self, ais_token_request, k8s_token_request):
@@ -152,11 +152,11 @@ class TestCredentials(object):
         assert creds.expiry == mock_expiry
 
     @mock.patch(
-        "google.oauth2.gdch_credentials.Credentials._make_k8s_token_request",
+        "google.oauth2.gdch_credentials.ServiceAccountCredentials._make_k8s_token_request",
         autospec=True,
     )
     @mock.patch(
-        "google.oauth2.gdch_credentials.Credentials._make_ais_token_request",
+        "google.oauth2.gdch_credentials.ServiceAccountCredentials._make_ais_token_request",
         autospec=True,
     )
     def test_before_request(self, ais_token_request, k8s_token_request):

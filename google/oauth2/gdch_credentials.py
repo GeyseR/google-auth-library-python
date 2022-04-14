@@ -30,8 +30,9 @@ JWT_TOKEN_TYPE = "urn:ietf:params:oauth:token-type:jwt"
 SERVICE_ACCOUNT_TOKEN_TYPE = "urn:k8s:params:oauth:token-type:serviceaccount"
 
 
-class Credentials(credentials.CredentialsWithQuotaProject):
-    """Credentials for GDCH (`Google Distributed Cloud Hosted`_).
+class ServiceAccountCredentials(credentials.CredentialsWithQuotaProject):
+    """Credentials for GDCH (`Google Distributed Cloud Hosted`_) for service
+    account users.
 
     .. _Google Distributed Cloud Hosted:
         https://cloud.google.com/blog/topics/hybrid-cloud/\
@@ -44,7 +45,7 @@ class Credentials(credentials.CredentialsWithQuotaProject):
     following format::
 
         {
-            "type":"gdch",
+            "type":"gdch_service_account",
             "k8s_ca_cert_path":"<k8s ca cert pem file path>",
             "k8s_cert_path":"<k8s cert pem file path>",
             "k8s_key_path":"<k8s key pem file path>",
@@ -106,7 +107,7 @@ class Credentials(credentials.CredentialsWithQuotaProject):
                 and billing. This project may be different from the project
                 used to create the credentials.
         """
-        super(Credentials, self).__init__()
+        super(ServiceAccountCredentials, self).__init__()
         self._k8s_ca_cert_path = k8s_ca_cert_path
         self._k8s_cert_path = k8s_cert_path
         self._k8s_key_path = k8s_key_path

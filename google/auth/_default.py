@@ -36,7 +36,7 @@ _AUTHORIZED_USER_TYPE = "authorized_user"
 _SERVICE_ACCOUNT_TYPE = "service_account"
 _EXTERNAL_ACCOUNT_TYPE = "external_account"
 _IMPERSONATED_SERVICE_ACCOUNT_TYPE = "impersonated_service_account"
-_GDCH_TYPE = "gdch"
+_GDCH_SERVICE_ACCOUNT_TYPE = "gdch_service_account"
 _VALID_TYPES = (
     _AUTHORIZED_USER_TYPE,
     _SERVICE_ACCOUNT_TYPE,
@@ -159,8 +159,8 @@ def _load_credentials_from_info(
         credentials, project_id = _get_impersonated_service_account_credentials(
             filename, info, scopes
         )
-    elif credential_type == _GDCH_TYPE:
-        credentials, project_id = _get_gdch_credentials(info)
+    elif credential_type == _GDCH_SERVICE_ACCOUNT_TYPE:
+        credentials, project_id = _get_gdch_service_account_credentials(info)
     else:
         raise exceptions.DefaultCredentialsError(
             "The file {file} does not have a valid type. "
@@ -424,7 +424,7 @@ def _get_impersonated_service_account_credentials(filename, info, scopes):
     return credentials, None
 
 
-def _get_gdch_credentials(info):
+def _get_gdch_service_account_credentials(info):
     from google.oauth2 import gdch_credentials
 
     k8s_ca_cert_path = info.get("k8s_ca_cert_path")
@@ -435,7 +435,7 @@ def _get_gdch_credentials(info):
     ais_token_endpoint = info.get("ais_token_endpoint")
 
     return (
-        gdch_credentials.Credentials(
+        gdch_credentials.ServiceAccountCredentials(
             k8s_ca_cert_path,
             k8s_cert_path,
             k8s_key_path,
@@ -484,10 +484,10 @@ def default(scopes=None, request=None, quota_project_id=None, default_scopes=Non
        The project ID returned in this case is the one corresponding to the
        underlying workload identity pool resource if determinable.
 
-       If the environment variable is set to the path of a valid GDCH JSON
-       file (`Google Distributed Cloud Hosted`_), then a GDCH credential will
-       be returned. The project ID returned is None unless it is set via
-       `GOOGLE_CLOUD_PROJECT` environment variable.
+       If the environment variable is set to the path of a valid GDCH service
+       account JSON file (`Google Distributed Cloud Hosted`_), then a GDCH
+       credential will be returned. The project ID returned is None unless it
+       is set via `GOOGLE_CLOUD_PROJECT` environment variable.
     2. If the `Google Cloud SDK`_ is installed and has application default
        credentials set they are loaded and returned.
 

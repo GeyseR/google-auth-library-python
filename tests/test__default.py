@@ -51,7 +51,7 @@ SERVICE_ACCOUNT_FILE = os.path.join(DATA_DIR, "service_account.json")
 
 CLIENT_SECRETS_FILE = os.path.join(DATA_DIR, "client_secrets.json")
 
-GDCH_FILE = os.path.join(DATA_DIR, "gdch.json")
+GDCH_SERVICE_ACCOUNT_FILE = os.path.join(DATA_DIR, "gdch_service_account.json")
 
 with open(SERVICE_ACCOUNT_FILE) as fh:
     SERVICE_ACCOUNT_FILE_DATA = json.load(fh)
@@ -1148,11 +1148,11 @@ def test_default_impersonated_service_account_set_both_scopes_and_default_scopes
 @mock.patch(
     "google.auth._cloud_sdk.get_application_default_credentials_path", autospec=True
 )
-def test_default_gdch_credentials(get_adc_path):
-    get_adc_path.return_value = GDCH_FILE
+def test_default_gdch_service_account_credentials(get_adc_path):
+    get_adc_path.return_value = GDCH_SERVICE_ACCOUNT_FILE
 
     credentials, _ = _default.default(quota_project_id="project-foo")
-    assert isinstance(credentials, gdch_credentials.Credentials)
+    assert isinstance(credentials, gdch_credentials.ServiceAccountCredentials)
     assert credentials._quota_project_id == "project-foo"
     assert credentials._k8s_ca_cert_path == "./k8s_ca_cert.pem"
     assert credentials._k8s_cert_path == "./k8s_cert.pem"
