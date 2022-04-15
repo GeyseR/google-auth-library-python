@@ -49,7 +49,7 @@ def _handle_error_response(response_data):
     Raises:
         google.auth.exceptions.RefreshError: The errors contained in response_data.
     """
-    if isinstance(response_data, str):
+    if isinstance(response_data, six.string_types):
         raise exceptions.RefreshError(response_data)
     try:
         error_details = "{}: {}".format(
