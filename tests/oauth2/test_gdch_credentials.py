@@ -19,6 +19,7 @@ import pytest  # type: ignore
 from six.moves import http_client
 
 from google.auth import exceptions
+from google.auth.transport import requests
 from google.oauth2 import gdch_credentials
 
 
@@ -62,7 +63,7 @@ class TestCredentials(object):
     @mock.patch("google.oauth2._client._token_endpoint_request", autospec=True)
     def test__make_k8s_token_request(self, token_endpoint_request):
         creds = self.make_credentials()
-        req = mock.Mock()
+        req = requests.Request()
 
         token_endpoint_request.return_value = {
             "status": {
@@ -77,15 +78,15 @@ class TestCredentials(object):
             {},
             None,
             True,
-            (creds._k8s_cert_path, creds._k8s_key_path),
-            creds._k8s_ca_cert_path,
             http_client.CREATED,
+            cert=(creds._k8s_cert_path, creds._k8s_key_path),
+            verify=creds._k8s_ca_cert_path,
         )
 
     @mock.patch("google.oauth2._client._token_endpoint_request", autospec=True)
     def test__make_k8s_token_request_no_token(self, token_endpoint_request):
         creds = self.make_credentials()
-        req = mock.Mock()
+        req = requests.Request()
 
         token_endpoint_request.return_value = {
             "status": {"expirationTimestamp": "2022-02-22T06:51:46Z"}
@@ -99,7 +100,7 @@ class TestCredentials(object):
     @mock.patch("google.auth._helpers.utcnow", autospec=True)
     def test__make_ais_token_request(self, utcnow, token_endpoint_request):
         creds = self.make_credentials()
-        req = mock.Mock()
+        req = requests.Request()
 
         token_endpoint_request.return_value = {
             "access_token": "ais_token",
@@ -125,8 +126,7 @@ class TestCredentials(object):
             },
             None,
             True,
-            None,
-            creds._ais_ca_cert_path,
+            verify=creds._ais_ca_cert_path,
         )
 
     @mock.patch(
@@ -143,13 +143,23 @@ class TestCredentials(object):
         ais_token_request.return_value = ("ais_token", mock_expiry)
 
         creds = self.make_credentials()
-        req = mock.Mock()
+        req = requests.Request()
         creds.refresh(req)
 
         k8s_token_request.assert_called_with(creds, req)
         ais_token_request.assert_called_with(creds, "k8s_token", req)
         assert creds.token == "ais_token"
         assert creds.expiry == mock_expiry
+
+    def test_refresh_request_not_requests_type(self):
+        creds = self.make_credentials()
+        req = mock.Mock()
+
+        with pytest.raises(exceptions.RefreshError) as excinfo:
+            creds.refresh(req)
+        assert excinfo.match(
+            "request must be a google.auth.transport.requests.Request object"
+        )
 
     @mock.patch(
         "google.oauth2.gdch_credentials.ServiceAccountCredentials._make_k8s_token_request",
@@ -165,7 +175,7 @@ class TestCredentials(object):
         cred = self.make_credentials()
         headers = {}
 
-        cred.before_request(mock.Mock(), "GET", "https://example.com", headers)
+        cred.before_request(requests.Request(), "GET", "https://example.com", headers)
         k8s_token_request.assert_called()
         ais_token_request.assert_called()
         assert headers["authorization"] == "Bearer ais_token"

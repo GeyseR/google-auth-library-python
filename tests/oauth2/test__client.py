@@ -106,8 +106,6 @@ def test__token_endpoint_request():
         url="http://example.com",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         body="test=params".encode("utf-8"),
-        cert=None,
-        verify=None,
     )
 
     # Check result
@@ -134,8 +132,6 @@ def test__token_endpoint_request_use_json():
             "Authorization": "Bearer access_token",
         },
         body=b'{"test": "params"}',
-        cert=None,
-        verify=None,
     )
 
     # Check result

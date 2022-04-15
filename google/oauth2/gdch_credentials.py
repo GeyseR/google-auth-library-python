@@ -125,9 +125,9 @@ class ServiceAccountCredentials(credentials.CredentialsWithQuotaProject):
             {},
             None,
             True,
-            (self._k8s_cert_path, self._k8s_key_path),
-            self._k8s_ca_cert_path,
             http_client.CREATED,
+            cert=(self._k8s_cert_path, self._k8s_key_path),
+            verify=self._k8s_ca_cert_path,
         )
 
         try:
@@ -154,8 +154,7 @@ class ServiceAccountCredentials(credentials.CredentialsWithQuotaProject):
             ais_request_body,
             None,
             True,
-            None,
-            self._ais_ca_cert_path,
+            verify=self._ais_ca_cert_path,
         )
         ais_token, _, ais_expiry, _ = _client._handle_refresh_grant_response(
             ais_response_data, None
@@ -164,6 +163,13 @@ class ServiceAccountCredentials(credentials.CredentialsWithQuotaProject):
 
     @_helpers.copy_docstring(credentials.Credentials)
     def refresh(self, request):
+        import google.auth.transport.requests
+
+        if not isinstance(request, google.auth.transport.requests.Request):
+            raise exceptions.RefreshError(
+                "For GDCH service account credentials, request must be a google.auth.transport.requests.Request object"
+            )
+
         k8s_token = self._make_k8s_token_request(request)
         self.token, self.expiry = self._make_ais_token_request(k8s_token, request)
 

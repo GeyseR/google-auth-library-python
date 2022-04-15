@@ -86,9 +86,8 @@ def _token_endpoint_request_no_throw(
     body,
     access_token=None,
     use_json=False,
-    cert=None,
-    verify=None,
     expected_status_code=http_client.OK,
+    **kwargs
 ):
     """Makes a request to the OAuth 2.0 authorization server's token endpoint.
     This function doesn't throw on response errors.
@@ -102,11 +101,10 @@ def _token_endpoint_request_no_throw(
         access_token (Optional(str)): The access token needed to make the request.
         use_json (Optional(bool)): Use urlencoded format or json format for the
             content type. The default value is False.
-        cert (Optional(Tuple[str, str])): The (cert_path, key_path) tuple for mTLS.
-        verify (Optional(str)): The CA cert path for server side TLS cert verification.
         expected_status_code (Optional(int)): The expected the status code of
             the token response. The default value is 200. We may expect other
             status code like 201 for GDCH credentials.
+        kwargs: Additionally arguments passed on to the request method.
 
     Returns:
         Tuple(bool, Mapping[str, str]): A boolean indicating if the request is
@@ -127,12 +125,7 @@ def _token_endpoint_request_no_throw(
     # occurs.
     while True:
         response = request(
-            method="POST",
-            url=token_uri,
-            headers=headers,
-            body=body,
-            cert=cert,
-            verify=verify,
+            method="POST", url=token_uri, headers=headers, body=body, **kwargs
         )
         response_body = (
             response.data.decode("utf-8")
@@ -169,9 +162,8 @@ def _token_endpoint_request(
     body,
     access_token=None,
     use_json=False,
-    cert=None,
-    verify=None,
     expected_status_code=http_client.OK,
+    **kwargs
 ):
     """Makes a request to the OAuth 2.0 authorization server's token endpoint.
 
@@ -184,11 +176,10 @@ def _token_endpoint_request(
         access_token (Optional(str)): The access token needed to make the request.
         use_json (Optional(bool)): Use urlencoded format or json format for the
             content type. The default value is False.
-        cert (Optional(Tuple[str, str])): The (cert_path, key_path) tuple for mTLS.
-        verify (Optional(str)): The CA cert path for server side TLS cert verification.
         expected_status_code (Optional(int)): The expected the status code of
             the token response. The default value is 200. We may expect other
             status code like 201 for GDCH credentials.
+        kwargs: Additionally arguments passed on to the request method.
 
     Returns:
         Mapping[str, str]: The JSON-decoded response data.
@@ -203,9 +194,8 @@ def _token_endpoint_request(
         body,
         access_token=access_token,
         use_json=use_json,
-        cert=cert,
-        verify=verify,
         expected_status_code=expected_status_code,
+        **kwargs
     )
     if not response_status_ok:
         _handle_error_response(response_data)
